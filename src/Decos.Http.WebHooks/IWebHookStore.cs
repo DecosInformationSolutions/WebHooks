@@ -8,10 +8,15 @@ namespace Decos.Http.WebHooks
     /// <summary>
     /// Defines methods for managing web hook subscriptions.
     /// </summary>
+    /// <typeparam name="TSubscription">
+    /// The type of class that implements the web hook subscription entity.
+    /// </typeparam>
     /// <typeparam name="TActions">
     /// The type of enum that specifies the events that can be subscribed to.
     /// </typeparam>
-    public interface IWebHookStore<TActions> where TActions : Enum
+    public interface IWebHookStore<TSubscription, TActions>
+        where TSubscription : WebHookSubscription<TActions>
+        where TActions : Enum
     {
         /// <summary>
         /// Adds or replaces a web hook subscription.
@@ -28,7 +33,7 @@ namespace Decos.Http.WebHooks
         /// exists, it will be overwritten. Otherwise, a new subscription is
         /// added.
         /// </remarks>
-        Task SubscribeAsync(WebHookSubscription<TActions> subscription, CancellationToken cancellationToken);
+        Task SubscribeAsync(TSubscription subscription, CancellationToken cancellationToken);
 
         /// <summary>
         /// Removes a web hook subscription.
@@ -41,7 +46,7 @@ namespace Decos.Http.WebHooks
         /// A task that returns <c>true</c> if the subscription was removed and
         /// <c>false</c> if the subscription does not exist.
         /// </returns>
-        Task<bool> UnsubscribeAsync(WebHookSubscription<TActions> subscription, CancellationToken cancellationToken);
+        Task<bool> UnsubscribeAsync(TSubscription subscription, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a collection of all web hook subscriptions.
@@ -56,7 +61,7 @@ namespace Decos.Http.WebHooks
         /// A token to monitor for cancellation requests.
         /// </param>
         /// <returns>A part of a collection of web hook subscriptions.</returns>
-        Task<IReadOnlyCollection<WebHookSubscription<TActions>>> GetSubscriptionsAsync(int size, int offset, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(int size, int offset, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a collection of web hook subscriptions that are subscribed
@@ -76,6 +81,6 @@ namespace Decos.Http.WebHooks
         /// A part of a collection of web hook subscriptions that match
         /// <paramref name="action"/>.
         /// </returns>
-        Task<IReadOnlyCollection<WebHookSubscription<TActions>>> GetSubscriptionsAsync(TActions action, int size, int offset, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(TActions action, int size, int offset, CancellationToken cancellationToken);
     }
 }
