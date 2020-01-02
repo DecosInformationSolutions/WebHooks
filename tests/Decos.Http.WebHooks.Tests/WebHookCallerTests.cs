@@ -91,12 +91,31 @@ namespace Decos.Http.WebHooks.Tests
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
         }
 
+        [Fact]
+        public async Task TimedOutInvocationsDoNotUpdateSubscriptions()
+        {
+            var subscriptions = Enumerable.Range(1, 5)
+                .Select(RegularSubscription)
+                .ToList();
+            var handler = new DelayedHttpHandler(TimeSpan.FromSeconds(60));
+            var serviceProvider = ConfigureServices(handler, subscriptions);
+            var caller = serviceProvider.GetRequiredService<TestCaller>();
+
+            await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
+
+            await FinishBackgroundTasksAsync(serviceProvider);
+            subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
+        }
+
         private IServiceProvider ConfigureServices(
             HttpMessageHandler httpMessageHandler,
             IEnumerable<TestWebHookSubscription> subscriptions)
         {
             var testStore = new TestStore(new List<TestWebHookSubscription>(subscriptions));
-            var httpClient = new HttpClient(httpMessageHandler);
+            var httpClient = new HttpClient(httpMessageHandler)
+            {
+                Timeout = TimeSpan.FromMilliseconds(100)
+            };
             return new ServiceCollection()
                 .AddBackgroundTasks()
                 .AddSingleton<ITestStore>(testStore)

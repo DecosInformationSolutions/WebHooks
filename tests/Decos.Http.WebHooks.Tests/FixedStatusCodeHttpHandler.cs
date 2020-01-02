@@ -10,7 +10,6 @@ namespace Decos.Http.WebHooks.Tests
     internal class FixedStatusCodeHttpHandler : HttpMessageHandler
     {
         private readonly List<Uri> _invokedUris = new List<Uri>();
-        private readonly HttpStatusCode _statusCode;
 
         public FixedStatusCodeHttpHandler()
             : this(HttpStatusCode.OK)
@@ -19,16 +18,18 @@ namespace Decos.Http.WebHooks.Tests
 
         public FixedStatusCodeHttpHandler(HttpStatusCode statusCode)
         {
-            _statusCode = statusCode;
+            StatusCode = statusCode;
         }
 
         public IReadOnlyCollection<Uri> InvokedUris => _invokedUris.AsReadOnly();
+
+        public HttpStatusCode StatusCode { get; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             _invokedUris.Add(request.RequestUri);
 
-            var response = new HttpResponseMessage(_statusCode)
+            var response = new HttpResponseMessage(StatusCode)
             {
                 RequestMessage = request,
                 Content = new StringContent("")
