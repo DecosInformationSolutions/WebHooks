@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -20,35 +21,40 @@ namespace Decos.Http.WebHooks.Tests
 
     public class WebHookCallerTests
     {
-        [Fact]
-        public async Task AllSubscriptionsShouldBeInvoked()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(50)]
+        public async Task AllSubscriptionsShouldBeInvoked(int count)
         {
-            var subscriptions = new List<TestWebHookSubscription>
-            {
-                new TestWebHookSubscription("1", "http://localhost/1", TestActions.Action1),
-                new TestWebHookSubscription("2", "http://localhost/2", TestActions.Action1),
-                new TestWebHookSubscription("3", "http://localhost/3", TestActions.Action1),
-                new TestWebHookSubscription("4", "http://localhost/4", TestActions.Action1),
-                new TestWebHookSubscription("5", "http://localhost/5", TestActions.Action1)
-            };
-            var testStore = new TestStore(subscriptions);
-
+            var subscriptions = Enumerable.Range(1, count)
+                .Select(RegularSubscription)
+                .ToList();
             var handler = new Always200OKHttpHandler();
-            var httpClient = new HttpClient(handler);
+            var serviceProvider = ConfigureServices(handler, subscriptions);
+            var caller = serviceProvider.GetRequiredService<TestCaller>();
 
-            var serviceProvider = new ServiceCollection()
+            await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
+
+            await FinishBackgroundTasksAsync(serviceProvider);
+            handler.InvokedUris.Should().BeEquivalentTo(subscriptions.Select(x => x.CallbackUri));
+        }
+
+        private IServiceProvider ConfigureServices(
+            HttpMessageHandler httpMessageHandler,
+            IEnumerable<TestWebHookSubscription> subscriptions)
+        {
+            var testStore = new TestStore(new List<TestWebHookSubscription>(subscriptions));
+            var httpClient = new HttpClient(httpMessageHandler);
+            return new ServiceCollection()
                 .AddBackgroundTasks()
                 .AddSingleton<ITestStore>(testStore)
                 .AddSingleton(httpClient)
                 .AddTransient<TestCaller>()
                 .BuildServiceProvider();
-
-            var caller = serviceProvider.GetRequiredService<TestCaller>();
-            await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, CancellationToken.None);
-
-            await FinishBackgroundTasksAsync(serviceProvider);
-            handler.InvokedUris.Should().BeEquivalentTo(subscriptions.Select(x => x.CallbackUri));
         }
+
+        private TestWebHookSubscription RegularSubscription(int i)
+            => new TestWebHookSubscription($"{i}", $"http://localhost/{i}", TestActions.Action1 | TestActions.Action2);
 
         private async Task FinishBackgroundTasksAsync(IServiceProvider serviceProvider)
         {
