@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Decos.Http.WebHooks.Tests
 {
+    [Flags]
     internal enum TestActions
     {
-        Action1,
-        Action2
+        None = 0,
+        Action1 = 1 << 0,
+        Action2 = 1 << 1,
+        All = Action1 | Action2
     }
 }

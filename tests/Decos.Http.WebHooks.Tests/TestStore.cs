@@ -28,11 +28,11 @@ namespace Decos.Http.WebHooks.Tests
         public Task<IReadOnlyCollection<TestWebHookSubscription>> GetSubscriptionsAsync(
             TestActions action, int size, int offset, CancellationToken cancellationToken)
         {
-            return Task.FromResult<IReadOnlyCollection<TestWebHookSubscription>>(
-                _list.Where(x => x.SubscribedActions.HasFlag(action))
+            var results = _list.Where(x => x.SubscribedActions.HasFlag(action))
                      .Skip(offset)
                      .Take(size)
-                     .ToImmutableHashSet());
+                     .ToImmutableHashSet();
+            return Task.FromResult<IReadOnlyCollection<TestWebHookSubscription>>(results);
         }
 
         public Task SubscribeAsync(TestWebHookSubscription subscription,
@@ -45,6 +45,9 @@ namespace Decos.Http.WebHooks.Tests
 
         public Task UpdateSubscriptionAsync(TestWebHookSubscription subscription,
             CancellationToken cancellationToken)
-            => Task.CompletedTask;
+        {
+            subscription.LastSuccess = DateTimeOffset.Now;
+            return Task.CompletedTask;
+        }
     }
 }

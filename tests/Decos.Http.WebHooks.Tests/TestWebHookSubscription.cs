@@ -15,5 +15,7 @@ namespace Decos.Http.WebHooks.Tests
             : base(clientId, new Uri(callbackUri), subscribedActions)
         {
         }
+
+        public override string ToString() => $"{CallbackUri}: {SubscribedActions}";
     }
 }
