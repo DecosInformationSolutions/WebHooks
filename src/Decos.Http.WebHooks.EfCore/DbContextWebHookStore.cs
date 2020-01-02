@@ -20,7 +20,8 @@ namespace Decos.Http.WebHooks.EfCore
     /// <typeparam name="TActions">
     /// The type of enum that specifies the events that can be subscribed to.
     /// </typeparam>
-    public class DbContextWebHookStore<TContext, TSubscription, TActions> : IWebHookStore<TSubscription, TActions>
+    public class DbContextWebHookStore<TContext, TSubscription, TActions> 
+        : IWebHookStore<TSubscription, TActions>
         where TContext : DbContext
         where TSubscription : WebHookSubscription<TActions>
         where TActions : Enum
@@ -53,7 +54,8 @@ namespace Decos.Http.WebHooks.EfCore
         /// A token to monitor for cancellation requests.
         /// </param>
         /// <returns>A part of a collection of web hook subscriptions.</returns>
-        public async Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(int size, int offset, CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(
+            int size, int offset, CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
@@ -81,7 +83,8 @@ namespace Decos.Http.WebHooks.EfCore
         /// A part of a collection of web hook subscriptions that match
         /// <paramref name="action"/>.
         /// </returns>
-        public async Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(TActions action, int size, int offset, CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(
+            TActions action, int size, int offset, CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
@@ -108,7 +111,8 @@ namespace Decos.Http.WebHooks.EfCore
         /// exists, it will be overwritten. Otherwise, a new subscription is
         /// added.
         /// </remarks>
-        public async Task SubscribeAsync(TSubscription subscription, CancellationToken cancellationToken)
+        public async Task SubscribeAsync(TSubscription subscription, 
+            CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
@@ -127,7 +131,8 @@ namespace Decos.Http.WebHooks.EfCore
         /// A task that returns <c>true</c> if the subscription was removed and
         /// <c>false</c> if the subscription does not exist.
         /// </returns>
-        public async Task<bool> UnsubscribeAsync(TSubscription subscription, CancellationToken cancellationToken)
+        public async Task<bool> UnsubscribeAsync(TSubscription subscription, 
+            CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
@@ -151,7 +156,8 @@ namespace Decos.Http.WebHooks.EfCore
         /// A token to monitor for cancellation requests.
         /// </param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task UpdateSubscriptionAsync(TSubscription subscription, CancellationToken cancellationToken)
+        public async Task UpdateSubscriptionAsync(TSubscription subscription, 
+            CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
