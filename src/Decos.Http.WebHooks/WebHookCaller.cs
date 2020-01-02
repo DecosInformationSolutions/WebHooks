@@ -78,9 +78,6 @@ namespace Decos.Http.WebHooks
             var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, JsonMediaType);
             var response = await _httpClient.PostAsync(subscription.CallbackUri, jsonContent, cancellationToken);
 
-            // Note: update won't work with Scoped life time - we need to give
-            // it a Singleton lifetime and turn EF core store into using
-            // DbContext from a factory instead
         }
     }
 }

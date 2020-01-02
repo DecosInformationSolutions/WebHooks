@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Decos.Http.WebHooks.EfCore
 {
@@ -24,23 +25,20 @@ namespace Decos.Http.WebHooks.EfCore
         where TSubscription : WebHookSubscription<TActions>
         where TActions : Enum
     {
-        private readonly TContext _context;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see
         /// cref="DbContextWebHookStore{TContext, TSubscription, TActions}"/>
         /// class.
         /// </summary>
-        /// <param name="context">The context to use.</param>
-        public DbContextWebHookStore(TContext context)
+        /// <param name="serviceProvider">
+        /// Used to resolve a DbContext instance.
+        /// </param>
+        public DbContextWebHookStore(IServiceProvider serviceProvider)
         {
-            _context = context;
+            _serviceProvider = serviceProvider;
         }
-
-        /// <summary>
-        /// Gets the DbSet that contains the subscriptions.
-        /// </summary>
-        protected DbSet<TSubscription> Subscriptions => _context.Set<TSubscription>();
 
         /// <summary>
         /// Returns a collection of all web hook subscriptions.
@@ -57,7 +55,9 @@ namespace Decos.Http.WebHooks.EfCore
         /// <returns>A part of a collection of web hook subscriptions.</returns>
         public async Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(int size, int offset, CancellationToken cancellationToken)
         {
-            return await Subscriptions
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TContext>();
+            return await context.Set<TSubscription>()
                 .Skip(offset)
                 .Take(size)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -83,7 +83,10 @@ namespace Decos.Http.WebHooks.EfCore
         /// </returns>
         public async Task<IReadOnlyCollection<TSubscription>> GetSubscriptionsAsync(TActions action, int size, int offset, CancellationToken cancellationToken)
         {
-            return await Subscriptions
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TContext>();
+            return await context.Set<TSubscription>()
+                .Skip(offset)
                 .Where(x => x.SubscribedActions.HasFlag(action))
                 .Skip(offset)
                 .Take(size)
@@ -107,8 +110,10 @@ namespace Decos.Http.WebHooks.EfCore
         /// </remarks>
         public async Task SubscribeAsync(TSubscription subscription, CancellationToken cancellationToken)
         {
-            Subscriptions.Update(subscription);
-            await _context.SaveChangesAsync(cancellationToken);
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TContext>();
+            context.Set<TSubscription>().Update(subscription);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -124,12 +129,15 @@ namespace Decos.Http.WebHooks.EfCore
         /// </returns>
         public async Task<bool> UnsubscribeAsync(TSubscription subscription, CancellationToken cancellationToken)
         {
-            var s = await Subscriptions.FindAsync(new object[] { subscription.Id }, cancellationToken);
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TContext>();
+            var s = await context.Set<TSubscription>()
+                .FindAsync(new object[] { subscription.Id }, cancellationToken).ConfigureAwait(false);
             if (s == null)
                 return false;
 
-            Subscriptions.Remove(s);
-            await _context.SaveChangesAsync(cancellationToken);
+            context.Set<TSubscription>().Remove(s);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return true;
         }
     }
