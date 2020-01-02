@@ -49,6 +49,18 @@ namespace Decos.Http.WebHooks
         Task<bool> UnsubscribeAsync(TSubscription subscription, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Marks a web hook subscription as successful.
+        /// </summary>
+        /// <param name="subscription">
+        /// The subscription to mark as updated.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token to monitor for cancellation requests.
+        /// </param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        Task UpdateSubscriptionAsync(TSubscription subscription, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Returns a collection of all web hook subscriptions.
         /// </summary>
         /// <param name="size">

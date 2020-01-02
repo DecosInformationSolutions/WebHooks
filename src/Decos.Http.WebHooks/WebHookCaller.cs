@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -76,8 +77,10 @@ namespace Decos.Http.WebHooks
         {
             var jsonPayload = JsonSerializer.Serialize(payload);
             var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, JsonMediaType);
-            var response = await _httpClient.PostAsync(subscription.CallbackUri, jsonContent, cancellationToken);
 
+            var response = await _httpClient.PostAsync(subscription.CallbackUri, jsonContent, cancellationToken);
+            if (response.IsSuccessStatusCode)
+                await _webHookStore.UpdateSubscriptionAsync(subscription, cancellationToken);
         }
     }
 }

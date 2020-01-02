@@ -140,5 +140,28 @@ namespace Decos.Http.WebHooks.EfCore
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return true;
         }
+
+        /// <summary>
+        /// Marks a web hook subscription as successful.
+        /// </summary>
+        /// <param name="subscription">
+        /// The subscription to mark as updated.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token to monitor for cancellation requests.
+        /// </param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task UpdateSubscriptionAsync(TSubscription subscription, CancellationToken cancellationToken)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TContext>();
+            var s = await context.Set<TSubscription>()
+                .FindAsync(new object[] { subscription.Id }, cancellationToken).ConfigureAwait(false);
+            if (s == null)
+                throw new InvalidOperationException("Could not find a matching subscription.");
+
+            s.LastSuccess = DateTimeOffset.Now;
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }
