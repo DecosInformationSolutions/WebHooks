@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Decos.AspNetCore.BackgroundTasks;
+using Polly;
 
 namespace Decos.Http.WebHooks
 {
@@ -58,8 +59,11 @@ namespace Decos.Http.WebHooks
                 foreach (var subscription in subscriptions)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    _backgroundTaskQueue.QueueBackgroundWorkItem(async ct
-                        => await InvokeSubscriptionAsync(subscription, payload, ct));
+                    _backgroundTaskQueue.QueueBackgroundWorkItem(async ct =>
+                    {
+                        var cts = CancellationTokenSource.CreateLinkedTokenSource(ct, cancellationToken); 
+                        await InvokeSubscriptionAsync(subscription, payload, cts.Token).ConfigureAwait(false);
+                    });
                 }
 
                 offset += subscriptions.Count;
@@ -76,8 +80,15 @@ namespace Decos.Http.WebHooks
             var jsonContent = new StringContent(jsonPayload, Encoding.UTF8,
                 JsonMediaType);
 
-            var response = await _httpClient.PostAsync(subscription.CallbackUri,
-                jsonContent, cancellationToken).ConfigureAwait(false);
+            var response = await Policy.Handle<OperationCanceledException>()
+                .OrResult<HttpResponseMessage>(x => !x.IsSuccessStatusCode)
+                .WaitAndRetryAsync(5, i => TimeSpan.FromSeconds(Math.Pow(5, i)))
+                .ExecuteAsync(async ct =>
+                {
+                    return await _httpClient.PostAsync(subscription.CallbackUri,
+                        jsonContent, ct).ConfigureAwait(false);
+                }, cancellationToken);
+
             if (response.IsSuccessStatusCode)
             {
                 await _webHookStore.UpdateSubscriptionAsync(subscription,
