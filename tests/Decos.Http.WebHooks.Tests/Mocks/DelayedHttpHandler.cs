@@ -4,9 +4,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Decos.Http.WebHooks.Tests
+namespace Decos.Http.WebHooks.Tests.Mocks
 {
-    internal class DelayedHttpHandler : HttpMessageHandler
+    public class DelayedHttpHandler : HttpMessageHandler
     {
         public DelayedHttpHandler(TimeSpan delay)
         {

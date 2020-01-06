@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Decos.Http.WebHooks.Tests
+namespace Decos.Http.WebHooks.Tests.Mocks
 {
-    internal class TestWebHookSubscription : WebHookSubscription<TestActions>
+    public class TestWebHookSubscription : WebHookSubscription<TestActions>
     {
         public TestWebHookSubscription(string clientId, Uri callbackUri,
             TestActions subscribedActions)

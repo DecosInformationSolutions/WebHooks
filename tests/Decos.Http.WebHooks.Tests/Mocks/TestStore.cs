@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Decos.Http.WebHooks.Tests
+namespace Decos.Http.WebHooks.Tests.Mocks
 {
-    internal class TestStore : IWebHookStore<TestWebHookSubscription, TestActions>
+    public class TestStore : IWebHookStore<TestWebHookSubscription, TestActions>
     {
         private readonly IList<TestWebHookSubscription> _list;
 

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -22,27 +25,22 @@ namespace Decos.Http.WebHooks
             IBackgroundTaskQueue backgroundTaskQueue,
             HttpClient httpClient)
         {
+            ValidateEnum<TActions>();
             _webHookStore = webHookStore;
             _backgroundTaskQueue = backgroundTaskQueue;
             _httpClient = httpClient;
         }
 
         /// <summary>
-        /// Sends a POST request to all web hook subscriptions that are
-        /// subscribed to the specified action.
+        /// Sends a POST request to all web hook subscriptions that are subscribed to the specified
+        /// action.
         /// </summary>
-        /// <typeparam name="TPayload">
-        /// The type of payload to send in the request.
-        /// </typeparam>
-        /// <param name="action">
-        /// The action that is the reason to invoke the web hook.
-        /// </param>
+        /// <typeparam name="TPayload">The type of payload to send in the request.</typeparam>
+        /// <param name="action">The action that is the reason to invoke the web hook.</param>
         /// <param name="payload">
         /// An object to send as the request body when invoking the web hook.
         /// </param>
-        /// <param name="cancellationToken">
-        /// A token to monitor for cancellation requests.
-        /// </param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task InvokeSubscriptionsAsync<TPayload>(TActions action,
             TPayload payload, CancellationToken cancellationToken)
@@ -75,11 +73,27 @@ namespace Decos.Http.WebHooks
             CancellationToken cancellationToken)
         {
             var jsonPayload = JsonSerializer.Serialize(payload);
-            var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, JsonMediaType);
+            var jsonContent = new StringContent(jsonPayload, Encoding.UTF8,
+                JsonMediaType);
 
-            var response = await _httpClient.PostAsync(subscription.CallbackUri, jsonContent, cancellationToken);
+            var response = await _httpClient.PostAsync(subscription.CallbackUri,
+                jsonContent, cancellationToken).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
-                await _webHookStore.UpdateSubscriptionAsync(subscription, cancellationToken);
+            {
+                await _webHookStore.UpdateSubscriptionAsync(subscription,
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private static void ValidateEnum<T>()
+        {
+            var type = typeof(T);
+            if (!type.IsEnum)
+                throw new InvalidEnumArgumentException($"The type of {nameof(TActions)} is not an enumeration.");
+
+            var flagsAttribute = type.GetCustomAttribute<FlagsAttribute>();
+            if (flagsAttribute == null)
+                throw new InvalidEnumArgumentException($"The type of {nameof(TActions)} is not a Flags enumeration.");
         }
     }
 }

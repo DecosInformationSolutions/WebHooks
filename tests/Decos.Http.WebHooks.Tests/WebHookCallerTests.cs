@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -7,10 +8,14 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Decos.AspNetCore.BackgroundTasks;
+using Decos.Http.WebHooks.Tests.Mocks;
+using Decos.Http.WebHooks.Tests.Mocks.NonFlags;
 
 using FluentAssertions;
 
 using Microsoft.Extensions.DependencyInjection;
+
+using Moq;
 
 using Xunit;
 
@@ -36,7 +41,28 @@ namespace Decos.Http.WebHooks.Tests
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
             await FinishBackgroundTasksAsync(serviceProvider);
-            handler.InvokedUris.Should().BeEquivalentTo(subscriptions.Select(x => x.CallbackUri));
+            handler.InvokedUris.Should().BeEquivalentTo(
+                subscriptions.Select(x => x.CallbackUri));
+        }
+
+        [Fact]
+        public void WebHookCallerThrowsIfEnumTypeParamIsNotFlags()
+        {
+            var testStore = new Mock<IWebHookStore<TestNonFlagsSubscription, TestNonFlagsAction>>();
+            var httpMessageHandler = new FixedStatusCodeHttpHandler(HttpStatusCode.OK);
+            var httpClient = new HttpClient(httpMessageHandler)
+            {
+                Timeout = TimeSpan.FromMilliseconds(100)
+            };
+            var serviceProvider = new ServiceCollection()
+                .AddBackgroundTasks()
+                .AddSingleton(testStore.Object)
+                .AddSingleton(httpClient)
+                .AddTransient<WebHookCaller<TestNonFlagsSubscription, TestNonFlagsAction>>()
+                .BuildServiceProvider();
+
+            Action resolve = () => _ = serviceProvider.GetRequiredService<WebHookCaller<TestNonFlagsSubscription, TestNonFlagsAction>>();
+            resolve.Should().Throw<InvalidEnumArgumentException>();
         }
 
         [Fact]

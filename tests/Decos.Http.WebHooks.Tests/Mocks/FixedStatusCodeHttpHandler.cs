@@ -5,9 +5,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Decos.Http.WebHooks.Tests
+namespace Decos.Http.WebHooks.Tests.Mocks
 {
-    internal class FixedStatusCodeHttpHandler : HttpMessageHandler
+    public class FixedStatusCodeHttpHandler : HttpMessageHandler
     {
         private readonly List<Uri> _invokedUris = new List<Uri>();
 
