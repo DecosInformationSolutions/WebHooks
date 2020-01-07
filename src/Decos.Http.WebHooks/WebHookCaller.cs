@@ -3,12 +3,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Decos.AspNetCore.BackgroundTasks;
+using Microsoft.Extensions.Options;
 using Polly;
 
 namespace Decos.Http.WebHooks
@@ -21,16 +23,29 @@ namespace Decos.Http.WebHooks
         private readonly IWebHookStore<TSubscription, TActions> _webHookStore;
         private readonly IBackgroundTaskQueue _backgroundTaskQueue;
         private readonly HttpClient _httpClient;
+        private readonly IOptionsMonitor<WebHookCallerOptions>? _options;
 
         public WebHookCaller(IWebHookStore<TSubscription, TActions> webHookStore,
             IBackgroundTaskQueue backgroundTaskQueue,
             HttpClient httpClient)
+            : this(webHookStore, backgroundTaskQueue, httpClient, null)
+        {
+        }
+
+        public WebHookCaller(IWebHookStore<TSubscription, TActions> webHookStore,
+            IBackgroundTaskQueue backgroundTaskQueue,
+            HttpClient httpClient,
+            IOptionsMonitor<WebHookCallerOptions>? options)
         {
             ValidateEnum<TActions>();
             _webHookStore = webHookStore;
             _backgroundTaskQueue = backgroundTaskQueue;
             _httpClient = httpClient;
+            _options = options;
         }
+
+        protected WebHookCallerOptions Options
+            => _options?.CurrentValue ?? new WebHookCallerOptions();
 
         /// <summary>
         /// Sends a POST request to all web hook subscriptions that are subscribed to the specified
@@ -82,7 +97,7 @@ namespace Decos.Http.WebHooks
 
             var response = await Policy.Handle<OperationCanceledException>()
                 .OrResult<HttpResponseMessage>(x => !x.IsSuccessStatusCode)
-                .WaitAndRetryAsync(5, i => TimeSpan.FromSeconds(Math.Pow(5, i)))
+                .WaitAndRetryAsync(Options.MaxRetries, Options.RetryPolicy.GetDelayFunc())
                 .ExecuteAsync(async ct =>
                 {
                     return await _httpClient.PostAsync(subscription.CallbackUri,

@@ -41,7 +41,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(1000);
+            var cts = new CancellationTokenSource(500);
             await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
             handler.InvokedUris.Should().BeEquivalentTo(
                 subscriptions.Select(x => x.CallbackUri));
@@ -79,7 +79,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(1000);
+            var cts = new CancellationTokenSource(500);
             await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
             handler.InvokedUris.Should().BeEquivalentTo(
                 subscriptions
@@ -100,7 +100,7 @@ namespace Decos.Http.WebHooks.Tests
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
-            var cts = new CancellationTokenSource(1000);
+            var cts = new CancellationTokenSource(500);
             await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
             subscriptions.Should().OnlyContain(x => x.LastSuccess != null);
         }
@@ -117,7 +117,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(1000);
+            var cts = new CancellationTokenSource(500);
             await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
         }
@@ -134,7 +134,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(1000);
+            var cts = new CancellationTokenSource(500);
             await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
         }
@@ -168,6 +168,11 @@ namespace Decos.Http.WebHooks.Tests
                 .AddBackgroundTasks()
                 .AddSingleton<ITestStore>(testStore)
                 .AddSingleton(httpClient)
+                .Configure<WebHookCallerOptions>(options =>
+                {
+                    options.MaxRetries = 1;
+                    options.RetryPolicy = RetryPolicy.Immediate;
+                })
                 .AddTransient<TestCaller>()
                 .BuildServiceProvider();
         }
@@ -190,7 +195,7 @@ namespace Decos.Http.WebHooks.Tests
                 var order = await queue.DequeueAsync(ct);
                 while (!ct.IsCancellationRequested)
                 {
-                    await ((BackgroundWorkItem.WorkOrder)order).Method(CancellationToken.None).ConfigureAwait(false);
+                    await ((BackgroundWorkItem.WorkOrder)order).Method(cancellationToken).ConfigureAwait(false);
 
                     ct = GetCancellationToken(DequeueTimeout, cancellationToken);
                     order = await queue.DequeueAsync(ct);
