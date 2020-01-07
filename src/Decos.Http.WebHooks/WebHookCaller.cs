@@ -1,16 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Decos.AspNetCore.BackgroundTasks;
+
 using Microsoft.Extensions.Options;
+
 using Polly;
 
 namespace Decos.Http.WebHooks
@@ -76,7 +76,7 @@ namespace Decos.Http.WebHooks
                     cancellationToken.ThrowIfCancellationRequested();
                     _backgroundTaskQueue.QueueBackgroundWorkItem(async ct =>
                     {
-                        var cts = CancellationTokenSource.CreateLinkedTokenSource(ct, cancellationToken); 
+                        var cts = CancellationTokenSource.CreateLinkedTokenSource(ct, cancellationToken);
                         await InvokeSubscriptionAsync(subscription, payload, cts.Token).ConfigureAwait(false);
                     });
                 }

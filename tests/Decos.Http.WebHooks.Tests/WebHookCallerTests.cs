@@ -41,8 +41,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(500);
-            await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
+            await FinishBackgroundTasksAsync(serviceProvider);
             handler.InvokedUris.Should().BeEquivalentTo(
                 subscriptions.Select(x => x.CallbackUri));
         }
@@ -79,8 +78,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(500);
-            await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
+            await FinishBackgroundTasksAsync(serviceProvider);
             handler.InvokedUris.Should().BeEquivalentTo(
                 subscriptions
                     .Where(x => x.SubscribedActions == TestActions.Action1)
@@ -100,8 +98,7 @@ namespace Decos.Http.WebHooks.Tests
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
-            var cts = new CancellationTokenSource(500);
-            await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
+            await FinishBackgroundTasksAsync(serviceProvider);
             subscriptions.Should().OnlyContain(x => x.LastSuccess != null);
         }
 
@@ -117,8 +114,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(500);
-            await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
+            await FinishBackgroundTasksAsync(serviceProvider);
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
         }
 
@@ -134,8 +130,7 @@ namespace Decos.Http.WebHooks.Tests
 
             await caller.InvokeSubscriptionsAsync(TestActions.Action1, new { }, default);
 
-            var cts = new CancellationTokenSource(500);
-            await FinishBackgroundTasksAsync(serviceProvider, cts.Token);
+            await FinishBackgroundTasksAsync(serviceProvider);
             subscriptions.Should().OnlyContain(x => x.LastSuccess == null);
         }
 
