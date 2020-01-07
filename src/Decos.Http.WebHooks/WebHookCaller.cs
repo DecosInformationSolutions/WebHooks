@@ -15,6 +15,13 @@ using Polly;
 
 namespace Decos.Http.WebHooks
 {
+    /// <summary>
+    /// Sends POST requests to all matching web hook subscriptions.
+    /// </summary>
+    /// <typeparam name="TSubscription">
+    /// The type of object that represents a subscription.
+    /// </typeparam>
+    /// <typeparam name="TActions">The type of enum that specifies the actions.</typeparam>
     public class WebHookCaller<TSubscription, TActions> : IWebHookCaller<TActions>
         where TSubscription : WebHookSubscription<TActions>
         where TActions : Enum
@@ -25,6 +32,13 @@ namespace Decos.Http.WebHooks
         private readonly HttpClient _httpClient;
         private readonly IOptionsMonitor<WebHookCallerOptions>? _options;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebHookCaller{TSubscription, TActions}"/>
+        /// class with the specified services.
+        /// </summary>
+        /// <param name="webHookStore">Used to access subscriptions.</param>
+        /// <param name="backgroundTaskQueue">Used to schedule background tasks.</param>
+        /// <param name="httpClient">Used to send requests.</param>
         public WebHookCaller(IWebHookStore<TSubscription, TActions> webHookStore,
             IBackgroundTaskQueue backgroundTaskQueue,
             HttpClient httpClient)
@@ -32,6 +46,14 @@ namespace Decos.Http.WebHooks
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebHookCaller{TSubscription, TActions}"/>
+        /// class with the specified services.
+        /// </summary>
+        /// <param name="webHookStore">Used to access subscriptions.</param>
+        /// <param name="backgroundTaskQueue">Used to schedule background tasks.</param>
+        /// <param name="httpClient">Used to send requests.</param>
+        /// <param name="options">Options for the caller.</param>
         public WebHookCaller(IWebHookStore<TSubscription, TActions> webHookStore,
             IBackgroundTaskQueue backgroundTaskQueue,
             HttpClient httpClient,
@@ -44,6 +66,9 @@ namespace Decos.Http.WebHooks
             _options = options;
         }
 
+        /// <summary>
+        /// Gets the configured options.
+        /// </summary>
         protected WebHookCallerOptions Options
             => _options?.CurrentValue ?? new WebHookCallerOptions();
 
@@ -67,7 +92,7 @@ namespace Decos.Http.WebHooks
             while (!cancellationToken.IsCancellationRequested)
             {
                 var subscriptions = await _webHookStore.GetSubscriptionsAsync(
-                    action, Size, offset, cancellationToken);
+                    action, Size, offset, cancellationToken).ConfigureAwait(false);
                 if (subscriptions.Count == 0)
                     break;
 
@@ -87,6 +112,14 @@ namespace Decos.Http.WebHooks
             }
         }
 
+        /// <summary>
+        /// Sends a POST request a subscription with the specified payload.
+        /// </summary>
+        /// <typeparam name="TPayload">The type of object to send as request body.</typeparam>
+        /// <param name="subscription">The subscription to invoke.</param>
+        /// <param name="payload">An object to send as request body.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected virtual async Task InvokeSubscriptionAsync<TPayload>(
             TSubscription subscription, TPayload payload,
             CancellationToken cancellationToken)
@@ -102,7 +135,7 @@ namespace Decos.Http.WebHooks
                 {
                     return await _httpClient.PostAsync(subscription.CallbackUri,
                         jsonContent, ct).ConfigureAwait(false);
-                }, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {

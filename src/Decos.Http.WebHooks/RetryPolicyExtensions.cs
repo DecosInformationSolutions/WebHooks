@@ -4,6 +4,9 @@ using System.Threading;
 
 namespace Decos.Http.WebHooks
 {
+    /// <summary>
+    /// Provides a set of static methods for interacting with a <see cref="RetryPolicy"/>.
+    /// </summary>
     public static class RetryPolicyExtensions
     {
         /// <summary>
