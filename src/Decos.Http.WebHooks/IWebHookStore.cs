@@ -58,7 +58,7 @@ namespace Decos.Http.WebHooks
         /// A token to monitor for cancellation requests.
         /// </param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task UpdateSubscriptionAsync(TSubscription subscription, CancellationToken cancellationToken);
+        Task MarkSuccessfulAsync(TSubscription subscription, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a collection of all web hook subscriptions.

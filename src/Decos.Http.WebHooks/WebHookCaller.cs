@@ -139,7 +139,7 @@ namespace Decos.Http.WebHooks
 
             if (response.IsSuccessStatusCode)
             {
-                await _webHookStore.UpdateSubscriptionAsync(subscription,
+                await _webHookStore.MarkSuccessfulAsync(subscription,
                     cancellationToken).ConfigureAwait(false);
             }
         }

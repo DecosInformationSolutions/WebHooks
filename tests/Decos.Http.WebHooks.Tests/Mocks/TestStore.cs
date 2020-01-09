@@ -43,7 +43,7 @@ namespace Decos.Http.WebHooks.Tests.Mocks
             CancellationToken cancellationToken)
             => Task.FromResult(true);
 
-        public Task UpdateSubscriptionAsync(TestWebHookSubscription subscription,
+        public Task MarkSuccessfulAsync(TestWebHookSubscription subscription,
             CancellationToken cancellationToken)
         {
             subscription.LastSuccess = DateTimeOffset.Now;

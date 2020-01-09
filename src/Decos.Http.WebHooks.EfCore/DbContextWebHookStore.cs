@@ -111,7 +111,7 @@ namespace Decos.Http.WebHooks.EfCore
         /// exists, it will be overwritten. Otherwise, a new subscription is
         /// added.
         /// </remarks>
-        public async Task SubscribeAsync(TSubscription subscription, 
+        public async Task SubscribeAsync(TSubscription subscription,
             CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
@@ -156,7 +156,7 @@ namespace Decos.Http.WebHooks.EfCore
         /// A token to monitor for cancellation requests.
         /// </param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task UpdateSubscriptionAsync(TSubscription subscription, 
+        public async Task MarkSuccessfulAsync(TSubscription subscription, 
             CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
