@@ -20,7 +20,7 @@ namespace Decos.Http.WebHooks.EfCore
     /// <typeparam name="TActions">
     /// The type of enum that specifies the events that can be subscribed to.
     /// </typeparam>
-    public class DbContextWebHookStore<TContext, TSubscription, TActions> 
+    public class DbContextWebHookStore<TContext, TSubscription, TActions>
         : IWebHookStore<TSubscription, TActions>
         where TContext : DbContext
         where TSubscription : WebHookSubscription<TActions>

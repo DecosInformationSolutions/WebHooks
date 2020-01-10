@@ -4,6 +4,10 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Decos Information Solutions</Authors>
+    <Product>Decos.Http.WebHooks.EfCore</Product>
+    <Description>Provides support for managing web hook subscriptions through an Entity Framework Core database context.</Description>
   </PropertyGroup>
 
   <ItemGroup>
