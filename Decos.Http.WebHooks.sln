@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Decos.Http.WebHooks", "src\Decos.Http.WebHooks\Decos.Http.WebHooks.csproj", "{EC66D204-B38A-415E-9532-B49013894111}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Decos.Http.WebHooks.EfCore", "src\Decos.Http.WebHooks.EfCore\Decos.Http.WebHooks.EfCore.csproj", "{AF58A419-B6E9-4DF2-8D3F-7A6D62EB2305}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Decos.Http.WebHooks.Tests", "tests\Decos.Http.WebHooks.Tests\Decos.Http.WebHooks.Tests.csproj", "{1EA8C0CE-4641-483A-93F6-E910EF5D6234}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{EC66D204-B38A-415E-9532-B49013894111}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC66D204-B38A-415E-9532-B49013894111}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC66D204-B38A-415E-9532-B49013894111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF58A419-B6E9-4DF2-8D3F-7A6D62EB2305}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF58A419-B6E9-4DF2-8D3F-7A6D62EB2305}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF58A419-B6E9-4DF2-8D3F-7A6D62EB2305}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF58A419-B6E9-4DF2-8D3F-7A6D62EB2305}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EA8C0CE-4641-483A-93F6-E910EF5D6234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EA8C0CE-4641-483A-93F6-E910EF5D6234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EA8C0CE-4641-483A-93F6-E910EF5D6234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EA8C0CE-4641-483A-93F6-E910EF5D6234}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

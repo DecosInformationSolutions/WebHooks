@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Decos Information Solutions</Authors>
+    <Product>Decos.Http.WebHooks.EfCore</Product>
+    <Description>Provides support for managing web hook subscriptions through an Entity Framework Core database context.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Decos.Http.WebHooks\Decos.Http.WebHooks.csproj" />
+  </ItemGroup>
+
+</Project>

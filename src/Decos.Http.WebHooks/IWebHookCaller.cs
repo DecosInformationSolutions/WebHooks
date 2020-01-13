@@ -29,6 +29,7 @@ namespace Decos.Http.WebHooks
         /// A token to monitor for cancellation requests.
         /// </param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task InvokeSubscriptionsAsync<TPayload>(TActions action, TPayload payload, CancellationToken cancellationToken);
+        Task InvokeSubscriptionsAsync<TPayload>(TActions action, TPayload payload, 
+            CancellationToken cancellationToken);
     }
 }
